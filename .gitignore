@@ -4,3 +4,7 @@ __pycache__/
 .venv/
 venv/
 .env
+.local-data/
+*.db
+*.db-wal
+*.db-shm

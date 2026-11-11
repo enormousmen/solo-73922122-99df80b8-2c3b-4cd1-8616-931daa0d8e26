@@ -6,6 +6,9 @@ services:
       - "${API_PORT:-8000}:8000"
     environment:
       TZ: Asia/Shanghai
+      QC_DB_PATH: /data/qc_control.db
+    volumes:
+      - qc-data:/data
     restart: unless-stopped
     healthcheck:
       test:
@@ -17,3 +20,6 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
+
+volumes:
+  qc-data:

@@ -1,0 +1,9 @@
+{
+  "revision": 2,
+  "seq": 1,
+  "batch_uid": "B-20261109-001",
+  "water_result_ids": ["W0901", "W0902"],
+  "measured": "9.95",
+  "target": "10.00",
+  "stddev": "0.20"
+}

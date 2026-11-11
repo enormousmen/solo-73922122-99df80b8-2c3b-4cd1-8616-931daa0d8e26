@@ -12,9 +12,12 @@ from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, Field, model_validator
 
 from .matcher import InstrumentRow, SubmissionRow, analyze_matches
+from .qc_api import router as qc_router
 
 API_DESCRIPTION = """
-将仪器检测记录按样品编号核对到送检水样。
+将仪器检测记录按样品编号核对到送检水样，并提供质控放行判定。
+
+## 水样核对
 
 - 样品编号只允许英文字母和数字，比对时忽略大小写。
 - 仅当两个编号的 Levenshtein 编辑距离不超过 2 时才建立候选边。
@@ -25,16 +28,25 @@ API_DESCRIPTION = """
   `possible_unmatched` 标明该记录是否可能没有匹配。
 - 送检清单的样品编号允许重复；结果始终精确到送检行（`submission_id`），
   以免重复编号的不同采样点被混用。
+
+## 质控放行（`/api/v1/qc/...`）
+
+按同一仪器、同一检测项目维护最多 100 个质控批次，按 z=(实测值−靶值)/标准差
+判定放行/暂停：`|z|>3` 暂停，或与前一批同号且两者 `|z|>2` 时暂停，否则放行；
+暂停批次仍参与后一批判断。写入须携带全库修订号，支持新增、更正实测值与补录
+历史序号，全部在 SQLite 事务内原子完成。
 """
 
 app = FastAPI(
-    title="环保实验室水样核对 API",
+    title="环保实验室水样核对与质控放行 API",
     version="1.0.0",
     description=API_DESCRIPTION,
     contact={"name": "环保实验室"},
     docs_url="/docs",
     redoc_url="/redoc",
 )
+
+app.include_router(qc_router)
 
 
 class Submission(BaseModel):
